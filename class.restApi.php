@@ -1,8 +1,13 @@
 <?php
 class RestApi {
+    
+    private $_Surl = '';
+    private $_Smethod = 'GET';
+    private $_SdbFile = "./DB.json";
 
-    function __construct() {
-
+    function __construct($_Surl='', $_Smethod = 'GET') {
+        $this->_Surl = $_Surl;
+        $this->_Smethod = $_Smethod;
     }
 
     public function _init() {
@@ -31,7 +36,7 @@ class RestApi {
     }
 
     private function _setHeader() {
-        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Origin: '.trim($_SERVER['HTTP_REFERER'],'/'));
         header("Content-Type: application/json");
         header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE,OPTIONS");
         header("Access-Control-Max-Age: 0");
@@ -40,7 +45,7 @@ class RestApi {
 
     private function _readData() {
         $_Smethod = strtolower($_SERVER['REQUEST_METHOD']);
-        $_Sfile = file_get_contents("./DB.json");
+        $_Sfile = file_get_contents($this->_SdbFile);
         $_Adata = json_decode($_Sfile,1);
 
         if(!isset($_SERVER['PATH_INFO']))
@@ -87,7 +92,7 @@ class RestApi {
             case "delete":
             case "put":
             default:
-                parse_str(file_get_contents("php://input"),$_Adata);
+                $_Adata = json_decode(file_get_contents("php://input"),1);
                 break;
         }
         return $_Adata;
@@ -101,5 +106,42 @@ class RestApi {
             http_response_code($_Sdata['responseCode']);
     
         return json_encode($_Sdata);
+    }
+
+    private function _checkJson($_Jdata = '') {
+        $_Adata = (!$_Jdata) ? array() : json_decode($_Jdata,1);
+        if ($_Adata === null && json_last_error() !== JSON_ERROR_NONE)
+            return false;
+        return $_Adata;
+    }
+
+    public function _writeData($_Jrequest = '', $_Jresponse = '', $_JfailureResponse = '') {
+        if(!$this->_Surl || !$this->_Smethod)
+            return $this->_sendData('URL or Method is missing..');
+        if(!$_Jrequest && !$_Jresponse && !$_JfailureResponse)
+            return $this->_sendData('Request or Response or Failure json should be there..');
+        
+        $_Arequest = $this->_checkJson($_Jrequest);
+        $_Aresponse = $this->_checkJson($_Jresponse);
+        $_AfailureResponse = $this->_checkJson($_JfailureResponse);
+        
+        if($_Arequest === false || $_Aresponse === false || $_AfailureResponse === false)
+            return $this->_sendData('Invalid JSON');
+
+        $_AnewData = array(
+            "request" => $_Arequest,
+            "response" => $_Aresponse,
+            "failure_response" => $_AfailureResponse
+        );
+
+        $_AapiData = json_decode($this->_readData(),1);
+        if(!isset($_AapiData[$this->_Surl]))
+            $_AapiData[$this->_Surl] = array($this->_Smethod => $_AnewData);
+        else
+            $_AapiData[$this->_Surl][$this->_Smethod] = $_AnewData;
+        
+        @chmod($this->_SdbFile,0777);
+        file_put_contents($this->_SdbFile,json_encode($_AapiData));
+        return $this->_sendData(array("responseCode"=>0,"response"=>array("Message"=>"Data submitted successfully")));
     }
 }

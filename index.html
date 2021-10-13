@@ -2,42 +2,53 @@
 <html lang="en">
 <head>
     <title>:: REST API ::</title>
-    <style>
-        ul,h1,h2 { margin: 0; padding: 0; }
-        a { text-decoration: none; color: black; font-size: large; }
-        li { border: 1px solid #A4A9C2; padding: 5px; }
-        h1 { background-color: #fd9646;}
-        h2 { margin-top: 5px; padding: 5px; background-color: #A4A9C2; }
-        h3 { text-transform: uppercase; }
-    </style>
+    <link rel="stylesheet" href="./index.css" />
 </head>
 <body>
-    <h1>Rest API</h1>
+    <h1>Rest API<button id="newApi">New API</button></h1>
     <div id="app"></div>
-    <script type="text/javascript">
-        fetch('./index.php')
-        .then(response => response.json())
-        .then(data => {
-            var html = '<ul>';
-            for(var service in data) {
-                let link=window.location.href+service;
-                html += '<li><h2><a target="_blank" href="'+link+'">'+link+'/</a></h2><ul>';
-                for(var method in data[service]) {
-                    html += '<li><h3>'+method+'</h3>';
-                    html += '<h4>Success response:</h4>';
-                    html += '<pre>'+JSON.stringify(data[service][method]['response'])+'</pre>';
-                    html += '<h4>Failure response:</h4>';
-                    html += '<pre>'+JSON.stringify(data[service][method]['failure_response'])+'</pre>';
-                    html += '</li>';
-                }
-                html += '</ul></li>';
-            }
-            html += '</ul>';
-            document.getElementById('app').innerHTML = html;
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
-    </script>
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close">&times;</span>
+                <h3>Manage Rest API</h3>
+            </div>
+            <form>
+                <div class="modal-body">
+                    <p>
+                        <label for="url">Service name</label>
+                        <input type="text" placeholder="Enter service name (Ex: web_app_login, checksession,..)" name="url" required />
+                    </p>
+                    <p>
+                        <label for="method">Method </label>
+                        <select name="method" required>
+                            <option>GET</option>
+                            <option>POST</option>
+                            <option>PUT</option>
+                            <option>DELETE</option>
+                        </select>
+                    </p>
+                    <p>
+                        <label for="request">Request</label>
+                        <textarea required name="request">[]</textarea>
+                    </p>
+                    <p>
+                        <label for="response">Response</label>
+                        <textarea required name="response">[]</textarea>
+                    </p>
+                    <p>
+                        <label for="failureResponse">Failure response</label>
+                        <textarea required name="failureResponse">[]</textarea>
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <h3><input type="submit" /></h3>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script type="text/javascript" src="./index.js"></script>
 </body>
 </html>

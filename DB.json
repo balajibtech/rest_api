@@ -26,7 +26,7 @@
     },
     "checksession": {
         "get": {
-            "request": {},
+            "request": [],
             "response": {
                 "responseCode":200
             },
@@ -38,7 +38,7 @@
     "web_app_logout": {
         "get": {
             "auth": true,
-            "request": {},
+            "request": [],
             "response": {
                 "responseCode":200
             }
