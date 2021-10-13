@@ -66,7 +66,7 @@ document.getElementsByTagName('form')[0].onsubmit = function() {
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Success:', data);
+        alert(data.response.Message);
     })
     .catch((error) => {
         console.log('Error:', error);
