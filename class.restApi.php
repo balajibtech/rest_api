@@ -40,6 +40,7 @@ class RestApi {
         header("Content-Type: application/json");
         header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE,OPTIONS");
         header("Access-Control-Max-Age: 0");
+        header("Access-Control-Allow-Credentials: true");
         header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization");
     }
 
