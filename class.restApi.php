@@ -71,6 +71,9 @@ class RestApi {
     }
 
     private function _authCheck($_Surl, $_AapiData) {
+        session_set_cookie_params(["SameSite" => "None"]); //none, lax, strict
+        session_set_cookie_params(["Secure" => "false"]); //false, true
+        // session_set_cookie_params(["HttpOnly" => "true"]); //false, true
         session_start();
         if($_Surl == "checksession")
             return isset($_SESSION['email_id']) ? 'response' : 'failure_response';
@@ -105,7 +108,6 @@ class RestApi {
         }
         if(!in_array($_Sdata['responseCode'], array(0,1)))
             http_response_code($_Sdata['responseCode']);
-    
         return json_encode($_Sdata);
     }
 
