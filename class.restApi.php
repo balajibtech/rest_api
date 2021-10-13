@@ -36,7 +36,8 @@ class RestApi {
     }
 
     private function _setHeader() {
-        header('Access-Control-Allow-Origin: '.trim($_SERVER['HTTP_REFERER'],'/'));
+        if(isset($_SERVER['HTTP_REFERER']))
+            header('Access-Control-Allow-Origin: '.trim($_SERVER['HTTP_REFERER'],'/'));
         header("Content-Type: application/json");
         header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE,OPTIONS");
         header("Access-Control-Max-Age: 0");
@@ -45,6 +46,9 @@ class RestApi {
     }
 
     private function _readData() {
+        if(!file_exists($this->_SdbFile))
+            copy('./DB_sample.json',$this->_SdbFile) OR DIE('Error in creating JSON file');
+
         $_Smethod = strtolower($_SERVER['REQUEST_METHOD']);
         $_Sfile = file_get_contents($this->_SdbFile);
         $_Adata = json_decode($_Sfile,1);
