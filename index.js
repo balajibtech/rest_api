@@ -69,6 +69,7 @@ document.getElementsByTagName('form')[0].onsubmit = function() {
         alert(data.response.Message);
     })
     .catch((error) => {
+        alert("System error! Unable to updated the API. Please contact app administrator.");
         console.log('Error:', error);
     });
     return false;
