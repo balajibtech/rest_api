@@ -142,6 +142,7 @@ class RestApi {
         );
 
         $_AapiData = json_decode($this->_readData(),1);
+        $this->_Smethod = strtolower($this->_Smethod);
         if(!isset($_AapiData[$this->_Surl]))
             $_AapiData[$this->_Surl] = array($this->_Smethod => $_AnewData);
         else
