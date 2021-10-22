@@ -4,10 +4,14 @@ class RestApi {
     private $_Surl = '';
     private $_Smethod = 'GET';
     private $_SdbFile = "./DB.json";
+    private $_JdbData = '';
+    private $_Odb;
+    private $_isProd = false;
 
     function __construct($_Surl='', $_Smethod = 'GET') {
         $this->_Surl = $_Surl;
         $this->_Smethod = $_Smethod;
+        $this->_isProd = !(in_array($_SERVER['HTTP_HOST'],array('localhost','127.0.0.1','::1')));
     }
 
     public function _init() {
@@ -46,9 +50,12 @@ class RestApi {
     }
 
     private function _readData() {
-        if(!file_exists($this->_SdbFile))
-            copy('./DB_sample.json',$this->_SdbFile) OR DIE('Error in creating JSON file');
-
+        if(!file_exists($this->_SdbFile)) {
+            if($this->_isProd === false)
+                copy('./DB_sample.json',$this->_SdbFile) OR DIE('Error in creating JSON file');
+            else
+                file_put_contents($this->_SdbFile, $this->_reteriveData());
+        }
         $_Smethod = strtolower($_SERVER['REQUEST_METHOD']);
         $_Sfile = file_get_contents($this->_SdbFile);
         $_Adata = json_decode($_Sfile,1);
@@ -150,6 +157,61 @@ class RestApi {
         
         @chmod($this->_SdbFile,0777);
         file_put_contents($this->_SdbFile,json_encode($_AapiData));
+        if($this->_isProd === true)
+            $this->_migrateData();
         return $this->_sendData(array("responseCode"=>0,"response"=>array("Message"=>"Data submitted successfully")));
+    }
+
+    private function _connectDB() {
+        if(!is_object($this->_Odb)) {
+            require_once("class.db.php");
+            $this->_Odb = new DB();
+        }
+        return $this->_Odb;
+    }
+
+    private function _reteriveData() {
+
+        if($this->_JdbData != '')
+            return $this->_JdbData;
+            
+        $this->_connectDB();
+        
+        $rows = $this->_Odb->_select('SELECT * FROM services');
+        $_AapiData = array();
+        foreach($rows as $row) {
+            $_AapiData[$row['url']][$row['method']] = array( 
+                'request' => json_decode($row['request'],1),
+                'response' => json_decode($row['response'],1),
+                'failure_response' => json_decode($row['failure_response'],1)
+            );
+        }
+        return $this->_JdbData = json_encode($_AapiData, JSON_UNESCAPED_SLASHES);
+    }
+
+    private function _migrateData() {
+        $this->_connectDB();
+        
+        $_AapiData = json_decode(file_get_contents($this->_SdbFile),1);
+        $this->_Odb->_query('TRUNCATE TABLE services');
+
+        foreach($_AapiData as $_Surl => $_Aapi) {
+            foreach($_Aapi as $_Smethod => $_Adata) {
+                if(!isset($_Adata['request']))
+                    $_Adata['request'] = array();
+                    if(!isset($_Adata['response']))
+                        $_Adata['response'] = array();
+                if(!isset($_Adata['failure_response']))
+                    $_Adata['failure_response'] = array();
+                $this->_Odb->_query("INSERT INTO services VALUES
+                (NULL,
+                '".$_Smethod."',
+                '".$_Surl."',
+                '".json_encode($_Adata['request'])."',
+                '".json_encode($_Adata['response'])."',
+                '".json_encode($_Adata['failure_response'])."')");
+            }
+        }
+        return true;
     }
 }
