@@ -133,7 +133,7 @@ input[type=submit] {
     padding: 10px;
 }
 
-a#edit {
+a.edit {
   color: blue;
   font-size: 12px;
 }

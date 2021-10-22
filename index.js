@@ -8,7 +8,7 @@
             let link=window.location.href+service;
             html += '<li><h2><a target="_blank" href="'+link+'">'+link+'/</a></h2><ul>';
             for(var method in data[service]) {
-                html += '<li><h3>'+method+' <a href="javascript:;" id="edit">Edit</a></h3>';
+                html += '<li><h3>'+method+' <a href="javascript:;" class="edit">Edit</a></h3>';
                 html += '<h4>Request:</h4>';
                 html += '<pre>'+JSON.stringify(data[service][method]['request'])+'</pre>';
                 html += '<h4>Success response:</h4>';
@@ -22,7 +22,9 @@
         html += '</ul>';
         document.getElementById('app').innerHTML = html;
 
-        document.getElementById('edit').onclick = function() {
+        var elements = document.getElementsByClassName("edit");
+
+        var myFunction = function() {
             modal.style.display = "block";
             var counter = 0, sibilings = this.parentElement.parentElement.children;
 
@@ -44,8 +46,11 @@
                     document.getElementsByName('method')[0].value = sibilings[i].childNodes[0].data.trim().toUpperCase();
                 }
             }
-            
         };
+
+        for (var i = 0; i < elements.length; i++) {
+            elements[i].addEventListener('click', myFunction, false);
+        }
     })
     .catch((error) => {
         console.log('Error:', error);
