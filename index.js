@@ -8,7 +8,7 @@
             let link=window.location.href+service;
             html += '<li><h2><a target="_blank" href="'+link+'">'+link+'/</a></h2><ul>';
             for(var method in data[service]) {
-                html += '<li><h3>'+method+'</h3>';
+                html += '<li><h3>'+method+' <a href="javascript:;" id="edit">Edit</a></h3>';
                 html += '<h4>Request:</h4>';
                 html += '<pre>'+JSON.stringify(data[service][method]['request'])+'</pre>';
                 html += '<h4>Success response:</h4>';
@@ -21,6 +21,31 @@
         }
         html += '</ul>';
         document.getElementById('app').innerHTML = html;
+
+        document.getElementById('edit').onclick = function() {
+            modal.style.display = "block";
+            var counter = 0, sibilings = this.parentElement.parentElement.children;
+
+            document.getElementsByName('url')[0].value = this.parentElement.parentElement.parentElement.parentElement.children[0].innerText.replace(window.location.href,'').slice(0,-1);
+            for(var i in sibilings) {
+                if(sibilings[i].nodeName == "PRE" && counter == 2) {
+                    document.getElementsByName('failureResponse')[0].value = sibilings[i].innerHTML;
+                    counter++;
+                }
+                if(sibilings[i].nodeName == "PRE" && counter == 1) {
+                    document.getElementsByName('response')[0].value = sibilings[i].innerHTML;
+                    counter++;
+                }
+                if(sibilings[i].nodeName == "PRE" && counter == 0) {
+                    document.getElementsByName('request')[0].value = sibilings[i].innerHTML;
+                    counter++;
+                }
+                if(sibilings[i].nodeName == "H3") {
+                    document.getElementsByName('method')[0].value = sibilings[i].childNodes[0].data.trim().toUpperCase();
+                }
+            }
+            
+        };
     })
     .catch((error) => {
         console.log('Error:', error);
