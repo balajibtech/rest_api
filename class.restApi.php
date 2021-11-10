@@ -3,7 +3,7 @@ class RestApi {
     
     private $_Surl = '';
     private $_Smethod = 'GET';
-    private $_SdbFile = "./DB.json";
+    public $_SdbFile = "./DB.json";
     private $_JdbData = '';
     private $_Odb;
     private $_isProd = false;
@@ -60,7 +60,7 @@ class RestApi {
         $_Sfile = file_get_contents($this->_SdbFile);
         $_Adata = json_decode($_Sfile,1);
 
-        if(!isset($_SERVER['PATH_INFO']))
+        if(!isset($_SERVER['PATH_INFO']) || empty($_SERVER['PATH_INFO']))
             return $_Sfile;
 
         $_Surl = strtolower(trim($_SERVER['PATH_INFO'],'/'));

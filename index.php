@@ -8,6 +8,9 @@ if(isset($_GET['form'])) {
     $_Adata = json_decode(file_get_contents("php://input"),1);
     $_OrestApi->__construct($_Adata['url'], $_Adata['method']);
     echo $_OrestApi->_writeData($_Adata['request'], $_Adata['response'], $_Adata['failureResponse']);
+}else if(isset($_GET['reset'])) {
+    unlink($_OrestApi->_SdbFile);
+    header("location: .");
 } else {
     echo $_OrestApi->_init();
 }
